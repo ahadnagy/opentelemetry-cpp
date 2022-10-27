@@ -59,7 +59,7 @@ mkdir -p "${BUILD_DIR}"
 [ -z "${PLUGIN_DIR}" ] && export PLUGIN_DIR=$HOME/plugin
 mkdir -p "${PLUGIN_DIR}"
 
-BAZEL_OPTIONS="--copt=-DENABLE_LOGS_PREVIEW --copt=-DENABLE_TEST"
+BAZEL_OPTIONS="--copt=-DENABLE_LOGS_PREVIEW --copt=-DENABLE_TEST --copt=-DENABLE_METRICS_EXEMPLAR_PREVIEW"
 
 BAZEL_TEST_OPTIONS="$BAZEL_OPTIONS --test_output=errors"
 
@@ -82,11 +82,29 @@ if [[ "$1" == "cmake.test" ]]; then
         -DWITH_ZIPKIN=ON \
         -DWITH_JAEGER=ON \
         -DWITH_ELASTICSEARCH=ON \
-        -DWITH_METRICS_PREVIEW=ON \
+        -DWITH_METRICS_PREVIEW=OFF \
+        -DWITH_METRICS_EXEMPLAR_PREVIEW=ON \
         -DWITH_LOGS_PREVIEW=ON \
         -DCMAKE_CXX_FLAGS="-Werror" \
         "${SRC_DIR}"
   make
+  make test
+  exit 0
+elif [[ "$1" == "cmake.maintainer.test" ]]; then
+  cd "${BUILD_DIR}"
+  rm -rf *
+  cmake -DCMAKE_BUILD_TYPE=Debug  \
+        -DWITH_PROMETHEUS=ON \
+        -DWITH_ZIPKIN=ON \
+        -DWITH_JAEGER=ON \
+        -DWITH_ELASTICSEARCH=ON \
+        -DWITH_LOGS_PREVIEW=ON \
+        -DWITH_METRICS_PREVIEW=OFF \
+        -DWITH_METRICS_EXEMPLAR_PREVIEW=ON \
+        -DWITH_ASYNC_EXPORT_PREVIEW=ON \
+        -DOTELCPP_MAINTAINER_MODE=ON \
+        "${SRC_DIR}"
+  make -k
   make test
   exit 0
 elif [[ "$1" == "cmake.with_async_export.test" ]]; then
@@ -98,6 +116,7 @@ elif [[ "$1" == "cmake.with_async_export.test" ]]; then
         -DWITH_JAEGER=ON \
         -DWITH_ELASTICSEARCH=ON \
         -DWITH_METRICS_PREVIEW=OFF \
+        -DWITH_METRICS_EXEMPLAR_PREVIEW=ON \
         -DWITH_LOGS_PREVIEW=ON \
         -DCMAKE_CXX_FLAGS="-Werror" \
         -DWITH_ASYNC_EXPORT_PREVIEW=ON \
@@ -126,6 +145,7 @@ elif [[ "$1" == "cmake.abseil.test" ]]; then
   rm -rf *
   cmake -DCMAKE_BUILD_TYPE=Debug  \
         -DWITH_METRICS_PREVIEW=OFF \
+        -DWITH_METRICS_EXEMPLAR_PREVIEW=ON \
         -DWITH_LOGS_PREVIEW=ON \
         -DCMAKE_CXX_FLAGS="-Werror" \
         -DWITH_ASYNC_EXPORT_PREVIEW=ON \
@@ -150,6 +170,7 @@ elif [[ "$1" == "cmake.c++20.stl.test" ]]; then
   rm -rf *
   cmake -DCMAKE_BUILD_TYPE=Debug  \
         -DWITH_METRICS_PREVIEW=OFF \
+        -DWITH_METRICS_EXEMPLAR_PREVIEW=ON \
         -DWITH_LOGS_PREVIEW=ON \
         -DCMAKE_CXX_FLAGS="-Werror" \
         -DWITH_ASYNC_EXPORT_PREVIEW=ON \
@@ -290,9 +311,13 @@ elif [[ "$1" == "bazel.nortti" ]]; then
   exit 0
 elif [[ "$1" == "bazel.asan" ]]; then
   bazel $BAZEL_STARTUP_OPTIONS test --config=asan $BAZEL_TEST_OPTIONS_ASYNC //...
+  bazel $BAZEL_STARTUP_OPTIONS run --config=asan $BAZEL_TEST_OPTIONS_ASYNC \
+  //examples/metrics_simple:metrics_ostream_example > /dev/null
   exit 0
 elif [[ "$1" == "bazel.tsan" ]]; then
   bazel $BAZEL_STARTUP_OPTIONS test --config=tsan $BAZEL_TEST_OPTIONS_ASYNC //...
+  bazel $BAZEL_STARTUP_OPTIONS run --config=tsan $BAZEL_TEST_OPTIONS_ASYNC \
+  //examples/metrics_simple:metrics_ostream_example > /dev/null
   exit 0
 elif [[ "$1" == "bazel.valgrind" ]]; then
   bazel $BAZEL_STARTUP_OPTIONS build $BAZEL_OPTIONS_ASYNC //...

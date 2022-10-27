@@ -78,10 +78,10 @@ namespace http_client = opentelemetry::ext::http::client;
 class OtlpHttpMetricExporterTestPeer : public ::testing::Test
 {
 public:
-  std::unique_ptr<opentelemetry::sdk::metrics::MetricExporter> GetExporter(
+  std::unique_ptr<opentelemetry::sdk::metrics::PushMetricExporter> GetExporter(
       std::unique_ptr<OtlpHttpClient> http_client)
   {
-    return std::unique_ptr<opentelemetry::sdk::metrics::MetricExporter>(
+    return std::unique_ptr<opentelemetry::sdk::metrics::PushMetricExporter>(
         new OtlpHttpMetricExporter(std::move(http_client)));
   }
 
@@ -296,7 +296,7 @@ public:
     last_value_point_data.is_lastvalue_valid_ = true;
     last_value_point_data.sample_ts_          = opentelemetry::common::SystemTimestamp{};
     opentelemetry::sdk::metrics::LastValuePointData last_value_point_data2{};
-    last_value_point_data2.value_              = 20l;
+    last_value_point_data2.value_              = (int64_t)20;
     last_value_point_data2.is_lastvalue_valid_ = true;
     last_value_point_data2.sample_ts_          = opentelemetry::common::SystemTimestamp{};
     opentelemetry::sdk::metrics::MetricData metric_data{
@@ -392,7 +392,7 @@ public:
     last_value_point_data.is_lastvalue_valid_ = true;
     last_value_point_data.sample_ts_          = opentelemetry::common::SystemTimestamp{};
     opentelemetry::sdk::metrics::LastValuePointData last_value_point_data2{};
-    last_value_point_data2.value_              = 20l;
+    last_value_point_data2.value_              = (int64_t)20;
     last_value_point_data2.is_lastvalue_valid_ = true;
     last_value_point_data2.sample_ts_          = opentelemetry::common::SystemTimestamp{};
     opentelemetry::sdk::metrics::MetricData metric_data{
@@ -492,7 +492,7 @@ public:
     histogram_point_data2.boundaries_ = {10.0, 20.0, 30.0};
     histogram_point_data2.count_      = 3;
     histogram_point_data2.counts_     = {200, 300, 400, 500};
-    histogram_point_data2.sum_        = 900l;
+    histogram_point_data2.sum_        = (int64_t)900;
 
     opentelemetry::sdk::metrics::MetricData metric_data{
         opentelemetry::sdk::metrics::InstrumentDescriptor{
@@ -627,7 +627,7 @@ public:
     histogram_point_data2.boundaries_ = {10.0, 20.0, 30.0};
     histogram_point_data2.count_      = 3;
     histogram_point_data2.counts_     = {200, 300, 400, 500};
-    histogram_point_data2.sum_        = 900l;
+    histogram_point_data2.sum_        = (int64_t)900;
 
     opentelemetry::sdk::metrics::MetricData metric_data{
         opentelemetry::sdk::metrics::InstrumentDescriptor{
@@ -734,8 +734,8 @@ public:
 
 TEST(OtlpHttpMetricExporterTest, Shutdown)
 {
-  auto exporter =
-      std::unique_ptr<opentelemetry::sdk::metrics::MetricExporter>(new OtlpHttpMetricExporter());
+  auto exporter = std::unique_ptr<opentelemetry::sdk::metrics::PushMetricExporter>(
+      new OtlpHttpMetricExporter());
   ASSERT_TRUE(exporter->Shutdown());
   auto result = exporter->Export(opentelemetry::sdk::metrics::ResourceMetrics{});
   EXPECT_EQ(result, opentelemetry::sdk::common::ExportResult::kFailure);

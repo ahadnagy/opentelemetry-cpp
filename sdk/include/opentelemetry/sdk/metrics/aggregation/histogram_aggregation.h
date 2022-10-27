@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #pragma once
+#include <memory>
 #ifndef ENABLE_METRICS_PREVIEW
 #  include "opentelemetry/common/spin_lock_mutex.h"
 #  include "opentelemetry/sdk/metrics/aggregation/aggregation.h"
@@ -18,11 +19,11 @@ namespace metrics
 class LongHistogramAggregation : public Aggregation
 {
 public:
-  LongHistogramAggregation(const HistogramAggregationConfig<long> *aggregation_config = nullptr);
+  LongHistogramAggregation(const AggregationConfig *aggregation_config = nullptr);
   LongHistogramAggregation(HistogramPointData &&);
   LongHistogramAggregation(const HistogramPointData &);
 
-  void Aggregate(long value, const PointAttributes &attributes = {}) noexcept override;
+  void Aggregate(int64_t value, const PointAttributes &attributes = {}) noexcept override;
 
   void Aggregate(double /* value */, const PointAttributes & /* attributes */) noexcept override {}
 
@@ -48,12 +49,11 @@ private:
 class DoubleHistogramAggregation : public Aggregation
 {
 public:
-  DoubleHistogramAggregation(
-      const HistogramAggregationConfig<double> *aggregation_config = nullptr);
+  DoubleHistogramAggregation(const AggregationConfig *aggregation_config = nullptr);
   DoubleHistogramAggregation(HistogramPointData &&);
   DoubleHistogramAggregation(const HistogramPointData &);
 
-  void Aggregate(long /* value */, const PointAttributes & /* attributes */) noexcept override {}
+  void Aggregate(int64_t /* value */, const PointAttributes & /* attributes */) noexcept override {}
 
   void Aggregate(double value, const PointAttributes &attributes = {}) noexcept override;
 

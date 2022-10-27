@@ -28,7 +28,7 @@ public:
   AsyncMetricStorage(InstrumentDescriptor instrument_descriptor,
                      const AggregationType aggregation_type,
                      const AttributesProcessor *attributes_processor,
-                     nostd::shared_ptr<AggregationConfig> aggregation_config,
+                     const AggregationConfig *aggregation_config,
                      void *state = nullptr)
       : instrument_descriptor_(instrument_descriptor),
         aggregation_type_{aggregation_type},
@@ -72,14 +72,14 @@ public:
   }
 
   void RecordLong(
-      const std::unordered_map<MetricAttributes, long, AttributeHashGenerator> &measurements,
+      const std::unordered_map<MetricAttributes, int64_t, AttributeHashGenerator> &measurements,
       opentelemetry::common::SystemTimestamp observation_time) noexcept override
   {
     if (instrument_descriptor_.value_type_ != InstrumentValueType::kLong)
     {
       return;
     }
-    Record<long>(measurements, observation_time);
+    Record<int64_t>(measurements, observation_time);
   }
 
   void RecordDouble(

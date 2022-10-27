@@ -59,9 +59,9 @@ const resource::Resource &MeterProvider::GetResource() const noexcept
   return context_->GetResource();
 }
 
-void MeterProvider::AddMetricReader(std::unique_ptr<MetricReader> reader) noexcept
+void MeterProvider::AddMetricReader(std::shared_ptr<MetricReader> reader) noexcept
 {
-  return context_->AddMetricReader(std::move(reader));
+  return context_->AddMetricReader(reader);
 }
 
 void MeterProvider::AddView(std::unique_ptr<InstrumentSelector> instrument_selector,
@@ -86,6 +86,18 @@ bool MeterProvider::Shutdown() noexcept
 bool MeterProvider::ForceFlush(std::chrono::microseconds timeout) noexcept
 {
   return context_->ForceFlush(timeout);
+}
+
+/**
+ * Shutdown MeterContext when MeterProvider is destroyed.
+ *
+ */
+MeterProvider::~MeterProvider()
+{
+  if (context_)
+  {
+    context_->Shutdown();
+  }
 }
 
 }  // namespace metrics

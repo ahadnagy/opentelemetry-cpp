@@ -32,10 +32,11 @@ public:
         map_and_reset_cell_(map_and_reset_cell)
   {}
 
-  void OfferMeasurement(long value,
-                        const MetricAttributes &attributes,
-                        const opentelemetry::context::Context &context,
-                        const opentelemetry::common::SystemTimestamp &timestamp) noexcept override
+  void OfferMeasurement(
+      int64_t value,
+      const MetricAttributes &attributes,
+      const opentelemetry::context::Context &context,
+      const opentelemetry::common::SystemTimestamp & /* timestamp */) noexcept override
   {
     if (!reservoir_cell_selector_)
     {
@@ -45,14 +46,15 @@ public:
         reservoir_cell_selector_->ReservoirCellIndexFor(storage_, value, attributes, context);
     if (idx != -1)
     {
-      storage_[idx].RecordDoubleMeasurement(value, attributes, context);
+      storage_[idx].RecordLongMeasurement(value, attributes, context);
     }
   }
 
-  void OfferMeasurement(double value,
-                        const MetricAttributes &attributes,
-                        const opentelemetry::context::Context &context,
-                        const opentelemetry::common::SystemTimestamp &timestamp) noexcept override
+  void OfferMeasurement(
+      double value,
+      const MetricAttributes &attributes,
+      const opentelemetry::context::Context &context,
+      const opentelemetry::common::SystemTimestamp & /* timestamp */) noexcept override
   {
     if (!reservoir_cell_selector_)
     {

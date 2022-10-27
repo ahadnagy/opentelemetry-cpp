@@ -61,7 +61,7 @@ public:
    * Note: This reader may not receive any in-flight meter data, but will get newly created meter
    * data. Note: This method is not thread safe, and should ideally be called from main thread.
    */
-  void AddMetricReader(std::unique_ptr<MetricReader> reader) noexcept;
+  void AddMetricReader(std::shared_ptr<MetricReader> reader) noexcept;
 
   /**
    * Attaches a View to list of configured Views for this Meter provider.
@@ -84,6 +84,8 @@ public:
    * Force flush the meter provider.
    */
   bool ForceFlush(std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept;
+
+  ~MeterProvider() override;
 
 private:
   std::shared_ptr<sdk::metrics::MeterContext> context_;
